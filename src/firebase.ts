@@ -2,19 +2,15 @@ import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
-// Your Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyBhb8b_3tbA_XWHMm2rsaIjk49f1Pe0_Jw",
-  authDomain: "campus-ems.firebaseapp.com",
-  projectId: "campus-ems",
-  storageBucket: "campus-ems.firebasestorage.app",
-  messagingSenderId: "448508629705",
-  appId: "1:448508629705:web:7aca806c3fc2eec2f5f318"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
-
-// Export Firebase services
 export const auth = getAuth(app);
 export const db = getFirestore(app);

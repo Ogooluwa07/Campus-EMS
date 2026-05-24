@@ -3,6 +3,7 @@ import {
   addDoc,
   collection,
   getDocs,
+  getDoc,
   query,
   serverTimestamp,
   updateDoc,
@@ -18,6 +19,21 @@ import EmptyState from "../components/EmptyState";
 import SkeletonEventCard from "../components/SkeletonEventCard";
 import { useToast } from "../context/ToastContext";
 import { formatDateTime } from "../utils/format";
+
+const CATEGORIES = [
+  "General",
+  "Academic",
+  "Sports",
+  "Cultural",
+  "Technology",
+  "Health & Wellness",
+  "Career & Professional",
+  "Social",
+  "Workshop",
+  "Seminar",
+  "Competition",
+  "Fundraiser",
+] as const;
 
 type Tab = "CREATE" | "MY_EVENTS" | "REGISTRATIONS" | "FEEDBACK";
 type StatusFilter = "ALL" | "APPROVED" | "PENDING" | "REJECTED";
@@ -97,9 +113,11 @@ export default function OrganizerDashboard() {
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
 
   // registrations
-  const [regs, setRegs] = useState<RegistrationRow[]>([]);
-  const [loadingRegs, setLoadingRegs] = useState(false);
+const [regs, setRegs] = useState<RegistrationRow[]>([]);
+const [loadingRegs, setLoadingRegs] = useState(false);
 
+// student names for registrations
+const [userNames, setUserNames] = useState<Record<string, string>>({});
   // feedback
   const [feedback, setFeedback] = useState<FeedbackRow[]>([]);
   const [loadingFeedback, setLoadingFeedback] = useState(false);
@@ -137,23 +155,58 @@ export default function OrganizerDashboard() {
     }
   };
 
-  const loadRegistrations = async (event: Event) => {
-    setSelectedEvent(event);
-    setRegs([]);
-    setLoadingRegs(true);
+const loadRegistrations = async (event: Event) => {
+  setSelectedEvent(event);
+  setRegs([]);
+  setLoadingRegs(true);
 
-    try {
-      const snap = await getDocs(collection(db, "events", event.id, "registrations"));
-      const list = snap.docs
-        .map((d) => d.data() as RegistrationRow)
-        .sort((a, b) => parseDate(b.createdAt) - parseDate(a.createdAt));
-      setRegs(list);
-    } catch (err: any) {
-      toast.push({ type: "error", title: "Failed to load registrations", message: err?.message ?? String(err) });
-    } finally {
-      setLoadingRegs(false);
-    }
-  };
+  try {
+    const snap = await getDocs(
+      collection(db, "events", event.id, "registrations")
+    );
+
+    const list = snap.docs
+      .map((d) => d.data() as RegistrationRow)
+      .sort((a, b) => parseDate(b.createdAt) - parseDate(a.createdAt));
+
+    setRegs(list);
+
+    // Fetch student names for all userIds
+    const names: Record<string, string> = {};
+
+    await Promise.all(
+      list.map(async (r) => {
+        if (!r.userId) return;
+
+        try {
+          const userSnap = await getDoc(doc(db, "users", r.userId));
+
+          if (userSnap.exists()) {
+            const data = userSnap.data() as any;
+
+            names[r.userId] =
+              data.fullName ||
+              data.name ||
+              data.email ||
+              r.userId;
+          }
+        } catch {
+          names[r.userId] = r.userId;
+        }
+      })
+    );
+
+    setUserNames(names);
+  } catch (err: any) {
+    toast.push({
+      type: "error",
+      title: "Failed to load registrations",
+      message: err?.message ?? String(err),
+    });
+  } finally {
+    setLoadingRegs(false);
+  }
+};
 
   const loadFeedback = async (event: Event) => {
     setSelectedEvent(event);
@@ -415,8 +468,19 @@ export default function OrganizerDashboard() {
 
                 <div style={{ height: 12 }} />
 
-                <label className="label">Category</label>
-                <input className="input" value={category} onChange={(e) => setCategory(e.target.value)} />
+              <label className="label">Category</label>
+
+<select
+  className="select"
+  value={category}
+  onChange={(e) => setCategory(e.target.value)}
+>
+  {CATEGORIES.map((c) => (
+    <option key={c} value={c}>
+      {c}
+    </option>
+  ))}
+</select>
 
                 <div style={{ height: 12 }} />
 
@@ -560,7 +624,8 @@ export default function OrganizerDashboard() {
                     regs.map((r) => (
                       <div key={r.userId} className="listItem">
                         <div className="row" style={{ justifyContent: "space-between" }}>
-                          <div style={{ fontWeight: 900, color: "var(--primary)" }}>Student ID: {r.userId}</div>
+                          <div style={{ fontWeight: 900, color: "var(--primary)" }}>
+  {userNames[r.userId] || r.userId} </div>
                           <span className={r.checkedInAt ? "badge badgeSuccess" : "badge badgeWarn"}>
                             {r.checkedInAt ? "ATTENDED" : "NOT ATTENDED"}
                           </span>

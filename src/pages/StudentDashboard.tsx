@@ -4,6 +4,7 @@ import {
   collection,
   collectionGroup,
   doc,
+  getDoc,       // ← add this
   onSnapshot,
   query,
   serverTimestamp,
@@ -608,8 +609,9 @@ function StudentRegistrationsPage() {
   const { user, profile } = useAuth();
   const toast = useToast();
 
-  const [regs, setRegs] = useState<MyReg[]>([]);
-  const [loading, setLoading] = useState(true);
+ const [regs, setRegs] = useState<MyReg[]>([]);
+const [loading, setLoading] = useState(true);
+const [eventTitles, setEventTitles] = useState<Record<string, string>>({});
 
   const canUse = !!user && profile?.role === "student";
 
@@ -628,8 +630,8 @@ function StudentRegistrationsPage() {
     );
 
     const unsub = onSnapshot(
-      q1,
-      (snap) => {
+  q1,
+  async (snap) => {
         const list = snap.docs.map((d) => d.data() as MyReg);
 
         // Optional: sort newest first
@@ -640,7 +642,29 @@ function StudentRegistrationsPage() {
         });
 
         setRegs(list);
-        setLoading(false);
+setLoading(false);
+
+// Fetch event titles
+const titles: Record<string, string> = {};
+
+await Promise.all(
+  list.map(async (r) => {
+    if (!r.eventId || titles[r.eventId]) return;
+
+    try {
+      const evSnap = await getDoc(doc(db, "events", r.eventId));
+
+      if (evSnap.exists()) {
+        titles[r.eventId] =
+          (evSnap.data() as any).title || r.eventId;
+      }
+    } catch {
+      titles[r.eventId] = r.eventId;
+    }
+  })
+);
+
+setEventTitles(titles);
       },
       (err) => {
         setLoading(false);
@@ -702,8 +726,8 @@ function StudentRegistrationsPage() {
               <div key={r.eventId} className="listItem">
                 <div className="row" style={{ justifyContent: "space-between", alignItems: "center", gap: 10 }}>
                   <div style={{ fontWeight: 1000, color: "var(--primary)" }}>
-                    Event ID: {r.eventId}
-                  </div>
+  {eventTitles[r.eventId] || r.eventId}
+</div>
 
                   <span className={badge.cls}>{badge.label}</span>
                 </div>

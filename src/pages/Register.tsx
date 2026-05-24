@@ -87,39 +87,42 @@ export default function Register() {
 
           <div className="cardBody">
             <form onSubmit={handleRegister}>
-              <label className="label">Full Name</label>
-              <input
-                className="input"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                placeholder="Your name"
-                required
-              />
-              <div className="helper">Use your real name for attendance lists.</div>
+             <label className="label">Full Name</label>
+<input
+  className="input"
+  value={fullName}
+  onChange={(e) => setFullName(e.target.value)}
+  placeholder="Your name"
+  autoComplete="name"
+  autoFocus
+  required
+/>
+<div className="helper">Use your real name for attendance lists.</div>
 
               <div style={{ height: 12 }} />
 
-              <label className="label">Email</label>
-              <input
-                className="input"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@example.com"
-                required
-              />
-
+           <label className="label">Email</label>
+<input
+  className="input"
+  type="email"
+  value={email}
+  onChange={(e) => setEmail(e.target.value)}
+  placeholder="you@example.com"
+  autoComplete="email"
+  required
+/>
               <div style={{ height: 12 }} />
 
-              <label className="label">Password</label>
-              <input
-                className="input"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Minimum 6 characters"
-                required
-              />
+             <label className="label">Password</label>
+<input
+  className="input"
+  type="password"
+  value={password}
+  onChange={(e) => setPassword(e.target.value)}
+  placeholder="Minimum 6 characters"
+  autoComplete="new-password"
+  required
+/>
               <div className="helper">At least 6 characters.</div>
 
               <div style={{ height: 16 }} />

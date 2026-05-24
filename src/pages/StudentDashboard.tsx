@@ -4,7 +4,8 @@ import {
   collection,
   collectionGroup,
   doc,
-  getDoc,       // ← add this
+  getDoc,  
+  updateDoc, 
   onSnapshot,
   query,
   serverTimestamp,
@@ -755,12 +756,186 @@ setEventTitles(titles);
   );
 }
 
+function StudentProfilePage() {
+  const { user, profile, refreshProfile } = useAuth();
+  const toast = useToast();
+
+  const [fullName, setFullName] = useState(profile?.fullName ?? "");
+  const [saving, setSaving] = useState(false);
+  const [success, setSuccess] = useState(false);
+
+  const isDirty = fullName.trim() !== (profile?.fullName ?? "").trim();
+
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!user || !isDirty) return;
+
+    const clean = fullName.trim();
+
+    if (clean.length < 2) {
+      toast.push({
+        type: "error",
+        title: "Name too short",
+        message: "Please enter your full name.",
+      });
+      return;
+    }
+
+    setSaving(true);
+    setSuccess(false);
+
+    try {
+      await updateDoc(doc(db, "users", user.uid), {
+        fullName: clean,
+        updatedAt: serverTimestamp(),
+      });
+
+      await refreshProfile();
+
+      setSuccess(true);
+
+      toast.push({
+        type: "success",
+        title: "Profile updated",
+        message: "Your name has been saved.",
+      });
+    } catch (err: any) {
+      toast.push({
+        type: "error",
+        title: "Update failed",
+        message: err?.message ?? "Unknown error",
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <>
+      <Navbar />
+
+      <div className="container">
+        <div style={{ maxWidth: 560, margin: "0 auto" }}>
+
+          <div className="card" style={{ marginBottom: 16 }}>
+            <div className="cardBody">
+
+              <div className="row">
+                <span className="badge badgePrimary">Student</span>
+                <span className="badge">Profile</span>
+
+                <div className="spacer" />
+
+                <Link className="btn btnGhost" to="/student">
+                  Back
+                </Link>
+              </div>
+
+              <h1 className="h1" style={{ marginTop: 12 }}>
+                My Profile
+              </h1>
+
+              <p className="p">
+                View and update your account details.
+              </p>
+
+            </div>
+          </div>
+
+          <div className="card">
+            <div className="cardBody">
+
+              <div className="listItem" style={{ marginBottom: 16 }}>
+                <div className="small">Email (cannot be changed)</div>
+
+                <div
+                  style={{
+                    fontWeight: 900,
+                    color: "var(--primary)",
+                    marginTop: 4,
+                  }}
+                >
+                  {user?.email ?? "—"}
+                </div>
+              </div>
+
+              <div className="listItem" style={{ marginBottom: 16 }}>
+                <div className="small">Role</div>
+
+                <div style={{ marginTop: 6 }}>
+                  <span className="badge badgeSuccess">
+                    {(profile?.role ?? "student").toUpperCase()}
+                  </span>
+                </div>
+              </div>
+
+              <div className="hr" />
+
+              {success && (
+                <div
+                  className="notice noticeSuccess"
+                  style={{ marginBottom: 12 }}
+                >
+                  Profile updated successfully!
+                </div>
+              )}
+
+              <form onSubmit={handleSave}>
+
+                <label className="label" htmlFor="fullName">
+                  Full Name
+                </label>
+
+                <input
+                  id="fullName"
+                  className="input"
+                  value={fullName}
+                  onChange={(e) => {
+                    setFullName(e.target.value);
+                    setSuccess(false);
+                  }}
+                  placeholder="Your full name"
+                  autoComplete="name"
+                  style={{ marginBottom: 8 }}
+                />
+
+                <div className="helper">
+                  This name appears on attendance lists and registrations.
+                </div>
+
+                <div style={{ height: 16 }} />
+
+                <button
+                  className="btn btnPrimary btnWide"
+                  type="submit"
+                  disabled={saving || !isDirty}
+                >
+                  {saving
+                    ? "Saving..."
+                    : isDirty
+                    ? "Save changes"
+                    : "No changes"}
+                </button>
+
+              </form>
+
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </>
+  );
+}
+
 export default function StudentDashboard() {
   return (
     <Routes>
       <Route path="/" element={<StudentHome />} />
       <Route path="/events" element={<StudentEventsPage />} />
       <Route path="/registrations" element={<StudentRegistrationsPage />} />
+      <Route path="/profile" element={<StudentProfilePage />} />
       <Route path="*" element={<Navigate to="/student" replace />} />
     </Routes>
   );

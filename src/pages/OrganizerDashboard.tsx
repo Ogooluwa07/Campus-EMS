@@ -609,10 +609,42 @@ const loadRegistrations = async (event: Event) => {
                 </div>
 
                 <div className="cardBody">
-                  <div className="row" style={{ justifyContent: "space-between" }}>
-                    <span className="badge badgeInfo">{regs.length} student(s)</span>
-                    <button className="btn btnSoft" onClick={() => loadRegistrations(selectedEvent)}>Refresh</button>
-                  </div>
+                  <div className="row" style={{ justifyContent: "space-between", flexWrap: "wrap", gap: 10 }}>
+  <span className="badge badgeInfo">{regs.length} student(s)</span>
+  <div className="row" style={{ gap: 10 }}>
+    <button
+      className="btn btnSoft"
+      disabled={regs.length === 0}
+      onClick={() => {
+        const headers = ["Name", "Status", "Registered At", "Attended"];
+        const rows = regs.map((r) => [
+          userNames[r.userId] || r.userId,
+          r.status || "—",
+          r.createdAt ? new Date(
+            typeof r.createdAt?.seconds === "number"
+              ? r.createdAt.seconds * 1000
+              : r.createdAt
+          ).toLocaleString() : "—",
+          r.checkedInAt ? "Yes" : "No",
+        ]);
+        const csv = [headers, ...rows]
+          .map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(","))
+          .join("\n");
+        const blob = new Blob([csv], { type: "text/csv" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${selectedEvent!.title.replace(/\s+/g, "_")}_attendance.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+      }}
+    >
+      Export CSV
+    </button>
+    <button className="btn btnSoft" onClick={() => loadRegistrations(selectedEvent)}>Refresh</button>
+  </div>
+</div>
+
 
                   <div style={{ height: 12 }} />
 

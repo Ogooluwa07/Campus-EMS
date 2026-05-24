@@ -79,11 +79,16 @@ export default function Navbar() {
             </>
           ) : (
             <>
-              {profile?.role === "student" && (
-                <Link className={isActive("/student")} to="/student">
-                  Dashboard
-                </Link>
-              )}
+             {profile?.role === "student" && (
+  <>
+    <Link className={isActive("/student")} to="/student">
+      Dashboard
+    </Link>
+    <Link className={isActive("/student/profile")} to="/student/profile">
+      Profile
+    </Link>
+  </>
+)}
 
               {profile?.role === "organizer" && (
                 <Link className={isActive("/organizer")} to="/organizer">

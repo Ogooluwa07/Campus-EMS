@@ -17,6 +17,7 @@ import SkeletonEventCard from "../components/SkeletonEventCard";
 import { useToast } from "../context/ToastContext";
 import { formatDateTime } from "../utils/format";
 import { Link } from "react-router-dom";
+import { categoryGradient, categoryEmoji } from "../utils/categoryColors";
 
 export default function StudentEvents() {
   const { user, profile } = useAuth();
@@ -142,7 +143,9 @@ export default function StudentEvents() {
             {events.map((ev) => (
               <div key={ev.id} className="card">
                 <div className="cardBody">
-                  <div className="banner bannerSm" />
+                  <div className="bannerColoured" style={{ background: categoryGradient(ev.category) }}>
+  <span className="bannerEmoji">{categoryEmoji(ev.category)}</span>
+</div>
 
                   <div className="row" style={{ justifyContent: "space-between", marginTop: 12 }}>
                     <span className="badge badgePrimary">{ev.category || "Event"}</span>

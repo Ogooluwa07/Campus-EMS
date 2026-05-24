@@ -17,6 +17,7 @@ import EmptyState from "../components/EmptyState";
 import SkeletonEventCard from "../components/SkeletonEventCard";
 import { useToast } from "../context/ToastContext";
 import { formatDateTime } from "../utils/format";
+import { categoryGradient, categoryEmoji } from "../utils/categoryColors";
 
 type Tab = "PENDING" | "APPROVED" | "REJECTED" | "USERS";
 type ModerationStatus = "APPROVED" | "REJECTED";
@@ -60,6 +61,64 @@ export default function AdminDashboard() {
   const [savingUserId, setSavingUserId] = useState<string | null>(null);
 
   const isAdmin = profile?.role === "admin";
+
+  const [kpi, setKpi] = useState({
+  pending: 0,
+  approved: 0,
+  rejected: 0,
+  users: 0,
+  loading: true,
+});
+
+useEffect(() => {
+  if (!isAdmin) return;
+
+  const fetchKpi = async () => {
+    try {
+      const [
+        pendingSnap,
+        approvedSnap,
+        rejectedSnap,
+        usersSnap,
+      ] = await Promise.all([
+        getDocs(
+          query(
+            collection(db, "events"),
+            where("status", "==", "PENDING")
+          )
+        ),
+        getDocs(
+          query(
+            collection(db, "events"),
+            where("status", "==", "APPROVED")
+          )
+        ),
+        getDocs(
+          query(
+            collection(db, "events"),
+            where("status", "==", "REJECTED")
+          )
+        ),
+        getDocs(collection(db, "users")),
+      ]);
+
+      setKpi({
+        pending: pendingSnap.size,
+        approved: approvedSnap.size,
+        rejected: rejectedSnap.size,
+        users: usersSnap.size,
+        loading: false,
+      });
+    } catch {
+      setKpi((k) => ({
+        ...k,
+        loading: false,
+      }));
+    }
+  };
+
+  fetchKpi();
+}, [isAdmin]);
 
   // ── Events ──────────────────────────────────────────────
   const loadEvents = async (status: Tab) => {
@@ -171,10 +230,31 @@ export default function AdminDashboard() {
               <span className="badge">Moderation</span>
               <span className="badge">User Management</span>
             </div>
-            <h1 className="h1" style={{ marginTop: 12 }}>Admin Dashboard</h1>
-            <p className="p">Review event submissions and manage user roles.</p>
+           // REPLACE WITH:
+<h1 className="h1" style={{ marginTop: 12 }}>Admin Dashboard</h1>
+<p className="p">Review event submissions and manage user roles.</p>
 
-            <div className="hr" />
+{/* KPI Cards */}
+<div className="adminKpiGrid">
+  <div className="kpiCard kpiCardAccent">
+    <div className="kpiTop"><span className="kpiDot kpiDotWarn" /><span className="kpiTitle">Pending</span></div>
+    <div className="kpiBig">{kpi.loading ? "…" : kpi.pending}</div>
+  </div>
+  <div className="kpiCard">
+    <div className="kpiTop"><span className="kpiDot kpiDotSuccess" /><span className="kpiTitle">Approved</span></div>
+    <div className="kpiBig">{kpi.loading ? "…" : kpi.approved}</div>
+  </div>
+  <div className="kpiCard">
+    <div className="kpiTop"><span className="kpiDot kpiDotDanger" /><span className="kpiTitle">Rejected</span></div>
+    <div className="kpiBig">{kpi.loading ? "…" : kpi.rejected}</div>
+  </div>
+  <div className="kpiCard">
+    <div className="kpiTop"><span className="kpiDot kpiDotPrimary" /><span className="kpiTitle">Total Users</span></div>
+    <div className="kpiBig">{kpi.loading ? "…" : kpi.users}</div>
+  </div>
+</div>
+
+<div className="hr" />
 
             <div className="tabs">
               {(["PENDING", "APPROVED", "REJECTED"] as Tab[]).map((t) => (
@@ -219,7 +299,10 @@ export default function AdminDashboard() {
                 {events.map((event) => (
                   <div key={event.id} className="card">
                     <div className="cardBody">
-                      <div className="banner bannerSm" />
+                     // REPLACE WITH:
+<div className="bannerColoured" style={{ background: categoryGradient(event.category) }}>
+  <span className="bannerEmoji">{categoryEmoji(event.category)}</span>
+</div>
                       <div className="row" style={{ justifyContent: "space-between", marginTop: 12 }}>
                         <span className="badge badgePrimary">{event.category || "Event"}</span>
                         <span className={statusBadgeClass(event.status)}>{event.status}</span>

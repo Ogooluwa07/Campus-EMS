@@ -9,6 +9,7 @@ import { formatDateTime } from "../utils/format";
 import { useAuth } from "../context/AuthContext";
 import { collectionGroup, getDocs, query, where } from "firebase/firestore";
 import { db } from "../firebase";
+import { categoryGradient, categoryEmoji } from "../utils/categoryColors";
 
 type QuickMode = "DISCOVER" | "REGISTER" | "ATTEND" | "RATE";
 
@@ -341,7 +342,9 @@ export default function Events() {
               {paged.map((event) => (
                 <div key={event.id} className="card">
                   <div className="cardBody">
-                    <div className="banner bannerSm" />
+                    <div className="bannerColoured" style={{ background: categoryGradient(event.category) }}>
+  <span className="bannerEmoji">{categoryEmoji(event.category)}</span>
+</div>
 
                     <div className="row" style={{ justifyContent: "space-between", marginTop: 12 }}>
                       <span className="badge badgePrimary">{event.category || "Event"}</span>

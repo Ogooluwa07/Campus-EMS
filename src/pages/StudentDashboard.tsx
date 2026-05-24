@@ -23,6 +23,7 @@ import EmptyState from "../components/EmptyState";
 import SkeletonEventCard from "../components/SkeletonEventCard";
 import { useToast } from "../context/ToastContext";
 import { formatDateTime } from "../utils/format";
+import { categoryGradient, categoryEmoji } from "../utils/categoryColors";
 
 type MyReg = {
   eventId: string;
@@ -125,111 +126,61 @@ function StudentHome() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [canUse, user?.uid]);
 
+  const greeting = (() => {
+    const h = new Date().getHours();
+    if (h < 12) return "Good morning";
+    if (h < 17) return "Good afternoon";
+    return "Good evening";
+  })();
+
   return (
     <>
       <Navbar />
-
       <div className="container">
-        {/* Header */}
-        <div className="card" style={{ marginBottom: 16 }}>
-          <div className="cardBody">
-            <div className="row" style={{ justifyContent: "space-between", alignItems: "center", gap: 12 }}>
-              <div>
-                <div className="row" style={{ gap: 8 }}>
-                  <span className="badge badgePrimary">Student</span>
-                  <span className="badge">Dashboard</span>
-                  <span className="badge badgeInfo">{displayName}</span>
-                </div>
 
-                <h1 className="h1" style={{ marginTop: 12, marginBottom: 6 }}>
-                  Student Dashboard
-                </h1>
-                <p className="p" style={{ margin: 0 }}>
-                  Discover campus events, register, and track your approval status.
-                </p>
-              </div>
-
-              <div className="row" style={{ gap: 10 }}>
-                <Link to="/student/events" className="btn btnPrimary">
-                  Browse Events
-                </Link>
-                <Link to="/student/registrations" className="btn btnSoft">
-                  My Registrations
-                </Link>
-                <button className="btn btnGhost" onClick={refreshProfile}>
-                  Refresh
-                </button>
-              </div>
-            </div>
-
-            <div className="hr" />
-
-            {/* KPI Row */}
-            <div className="grid2" style={{ marginTop: 10 }}>
-              <div className="listItem">
-                <div className="row" style={{ justifyContent: "space-between" }}>
-                  <span className="badge badgePrimary">Available</span>
-                  <span className="badge">{kpiLoading ? "…" : approvedEventsCount}</span>
-                </div>
-                <div style={{ marginTop: 10, fontWeight: 900, color: "var(--text)" }}>
-                  Approved Events
-                </div>
-                <div className="small" style={{ marginTop: 6 }}>
-                  Events currently open for students to register.
-                </div>
-              </div>
-
-              <div className="listItem">
-                <div className="row" style={{ justifyContent: "space-between" }}>
-                  <span className="badge badgeInfo">My Activity</span>
-                  <span className="badge">{kpiLoading ? "…" : myRegsCount}</span>
-                </div>
-                <div style={{ marginTop: 10, fontWeight: 900, color: "var(--text)" }}>
-                  Total Registrations
-                </div>
-                <div className="small" style={{ marginTop: 6 }}>
-                  All events you have registered for.
-                </div>
-              </div>
-
-              <div className="listItem">
-                <div className="row" style={{ justifyContent: "space-between" }}>
-                  <span className="badge badgeSuccess">Approved</span>
-                  <span className="badge">{kpiLoading ? "…" : approvedRegsCount}</span>
-                </div>
-                <div style={{ marginTop: 10, fontWeight: 900, color: "var(--text)" }}>
-                  Approved Registrations
-                </div>
-                <div className="small" style={{ marginTop: 6 }}>
-                  Registrations accepted by the admin.
-                </div>
-              </div>
-
-              <div className="listItem">
-                <div className="row" style={{ justifyContent: "space-between" }}>
-                  <span className="badge badgeWarn">Tip</span>
-                  <span className="badge">Smart</span>
-                </div>
-                <div style={{ marginTop: 10, fontWeight: 900, color: "var(--text)" }}>
-                  Use Search + Filters
-                </div>
-                <div className="small" style={{ marginTop: 6 }}>
-                  Find events faster by title, location, or category.
-                </div>
-              </div>
-            </div>
+        {/* Welcome Banner */}
+        <div className="welcomeBanner">
+          <p className="welcomeSub">{greeting} 👋</p>
+          <h1 className="welcomeName">{displayName}</h1>
+          <p className="welcomeSub">Discover events, register, and track your approvals — all in one place.</p>
+          <div className="welcomeActions">
+            <Link to="/student/events" className="btnWhite">Browse Events</Link>
+            <Link to="/student/registrations" className="btnWhiteOutline">My Registrations</Link>
+            <Link to="/student/profile" className="btnWhiteOutline">My Profile</Link>
           </div>
         </div>
 
-        {/* Upcoming events preview */}
-        <div className="card">
-          <div className="cardHeader">
-            <h2 className="h2">Upcoming approved events</h2>
-            <p className="p" style={{ marginTop: 6 }}>
-              A quick preview — open Events to search and register.
-            </p>
+        {/* KPI Cards */}
+        <div className="kpiGrid" style={{ marginBottom: 16 }}>
+          <div className="kpiCard kpiCardAccent">
+            <div className="kpiTop"><span className="kpiDot kpiDotPrimary" /><span className="kpiTitle">Available Events</span></div>
+            <div className="kpiBig">{kpiLoading ? "…" : approvedEventsCount}</div>
           </div>
+          <div className="kpiCard">
+            <div className="kpiTop"><span className="kpiDot kpiDotPrimary" /><span className="kpiTitle">My Registrations</span></div>
+            <div className="kpiBig">{kpiLoading ? "…" : myRegsCount}</div>
+          </div>
+          <div className="kpiCard">
+            <div className="kpiTop"><span className="kpiDot kpiDotSuccess" /><span className="kpiTitle">Approved</span></div>
+            <div className="kpiBig">{kpiLoading ? "…" : approvedRegsCount}</div>
+          </div>
+          <div className="kpiCard">
+            <div className="kpiTop"><span className="kpiDot kpiDotWarn" /><span className="kpiTitle">Pending</span></div>
+            <div className="kpiBig">{kpiLoading ? "…" : myRegsCount - approvedRegsCount}</div>
+          </div>
+        </div>
 
+        {/* Upcoming Events */}
+        <div className="card" style={{ marginBottom: 16 }}>
+          <div className="cardHeader">
+            <div className="row" style={{ justifyContent: "space-between" }}>
+              <div>
+                <h2 className="h2">Upcoming Events</h2>
+                <p className="p" style={{ marginTop: 6 }}>A quick preview — browse all events to register.</p>
+              </div>
+              <Link to="/student/events" className="btn btnSoft">View all</Link>
+            </div>
+          </div>
           <div className="cardBody">
             {recentEvents.length === 0 ? (
               <EmptyState title="No upcoming events yet" message="Check back later for new events." />
@@ -238,26 +189,21 @@ function StudentHome() {
                 {recentEvents.map((ev) => (
                   <div key={ev.id} className="card">
                     <div className="cardBody">
-                      <div className="banner bannerSm" />
-
+                      <div className="bannerColoured" style={{ background: categoryGradient(ev.category) }}>
+                        <span className="bannerEmoji">{categoryEmoji(ev.category)}</span>
+                      </div>
                       <div className="row" style={{ justifyContent: "space-between", marginTop: 12 }}>
-                        <span className="badge badgePrimary">{ev.category || "Event"}</span>
+                        <span className="badge badgePrimary">{ev.category || "General"}</span>
                         <span className="badge badgeSuccess">APPROVED</span>
                       </div>
-
                       <div className="eventTitle">{ev.title}</div>
                       <div className="eventDesc">{ev.description}</div>
-
                       <div className="eventMeta">
                         <span>📍 {ev.location || "TBA"}</span>
                         <span>🗓 {formatDateTime((ev as any).startTime)}</span>
                       </div>
-
                       <div className="eventFooter">
-                        <Link to="/student/events" className="btn btnSoft">
-                          View & Register
-                        </Link>
-                        <span className="small">Open full list</span>
+                        <Link to="/student/events" className="btn btnSoft">View & Register</Link>
                       </div>
                     </div>
                   </div>
@@ -268,76 +214,28 @@ function StudentHome() {
         </div>
 
         {/* How it works */}
-        <div className="card" style={{ marginTop: 16 }}>
+        <div className="card">
           <div className="cardHeader">
             <h2 className="h2">How it works</h2>
-            <p className="p" style={{ marginTop: 6 }}>
-              Register → Admin reviews → Your dashboard updates automatically.
-            </p>
+            <p className="p" style={{ marginTop: 6 }}>Register → Admin reviews → Your dashboard updates automatically.</p>
           </div>
-
           <div className="cardBody">
-            <div className="grid2">
-              <div className="listItem">
-                <div className="row" style={{ justifyContent: "space-between" }}>
-                  <span className="badge badgePrimary">Step 1</span>
-                  <span className="badge">Browse</span>
+            <div className="kpiGrid">
+              {[
+                { step: "1", label: "Browse",   title: "Find an event",       desc: "Only APPROVED events appear in your events list.",              dot: "kpiDotPrimary" },
+                { step: "2", label: "Register", title: "Register once",        desc: "After registering, your status appears in My Registrations.",   dot: "kpiDotWarn"    },
+                { step: "3", label: "Review",   title: "Admin reviews",        desc: "Your dashboard updates in real-time when approved.",            dot: "kpiDotSuccess" },
+                { step: "4", label: "Attend",   title: "Attend the event",     desc: "Show up and get marked as attended by the organizer.",          dot: "kpiDotDanger"  },
+              ].map(({ step, label, title, desc, dot }) => (
+                <div key={step} className="kpiCard">
+                  <div className="kpiTop">
+                    <span className={`kpiDot ${dot}`} />
+                    <span className="kpiTitle">Step {step} — {label}</span>
+                  </div>
+                  <div style={{ fontWeight: 900, color: "var(--text)", marginTop: 10, fontSize: 14 }}>{title}</div>
+                  <div className="small" style={{ marginTop: 6, lineHeight: 1.5 }}>{desc}</div>
                 </div>
-                <div style={{ marginTop: 10, fontWeight: 900, color: "var(--text)" }}>
-                  Choose an approved event
-                </div>
-                <div className="small" style={{ marginTop: 6 }}>
-                  Only events marked <b>APPROVED</b> appear.
-                </div>
-              </div>
-
-              <div className="listItem">
-                <div className="row" style={{ justifyContent: "space-between" }}>
-                  <span className="badge badgeWarn">Step 2</span>
-                  <span className="badge">Register</span>
-                </div>
-                <div style={{ marginTop: 10, fontWeight: 900, color: "var(--text)" }}>
-                  Register once
-                </div>
-                <div className="small" style={{ marginTop: 6 }}>
-                  After registering, the button changes to your status.
-                </div>
-              </div>
-
-              <div className="listItem">
-                <div className="row" style={{ justifyContent: "space-between" }}>
-                  <span className="badge badgeInfo">Step 3</span>
-                  <span className="badge">Review</span>
-                </div>
-                <div style={{ marginTop: 10, fontWeight: 900, color: "var(--text)" }}>
-                  Admin accepts/rejects
-                </div>
-                <div className="small" style={{ marginTop: 6 }}>
-                  Your dashboard updates in real-time.
-                </div>
-              </div>
-
-              <div className="listItem">
-                <div className="row" style={{ justifyContent: "space-between" }}>
-                  <span className="badge badgeSuccess">Shortcut</span>
-                  <span className="badge badgePrimary">Go</span>
-                </div>
-                <div style={{ marginTop: 10, fontWeight: 900, color: "var(--text)" }}>
-                  Quick actions
-                </div>
-                <div className="small" style={{ marginTop: 6 }}>
-                  Jump straight to Events or Registrations.
-                </div>
-
-                <div style={{ marginTop: 12 }} className="row">
-                  <Link to="/student/events" className="btn btnPrimary">
-                    Events
-                  </Link>
-                  <Link to="/student/registrations" className="btn btnSoft">
-                    Registrations
-                  </Link>
-                </div>
-              </div>
+              ))}
             </div>
           </div>
         </div>

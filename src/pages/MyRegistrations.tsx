@@ -4,6 +4,7 @@ import EmptyState from "../components/EmptyState";
 import SkeletonEventCard from "../components/SkeletonEventCard";
 import { useAuth } from "../context/AuthContext";
 import { db } from "../firebase";
+import { categoryGradient, categoryEmoji } from "../utils/categoryColors";
 import {
   collection,
   getDocs,
@@ -166,7 +167,16 @@ export default function MyRegistrations() {
             {rows.map(({ reg, event }) => (
               <div key={reg.eventId} className="card">
                 <div className="cardBody">
-                  <div className="banner bannerSm" />
+                  <div
+  className="bannerColoured"
+  style={{
+    background: categoryGradient(event?.category || "General"),
+  }}
+>
+  <span className="bannerEmoji">
+    {categoryEmoji(event?.category || "General")}
+  </span>
+</div>
 
                   <div
                     className="row"

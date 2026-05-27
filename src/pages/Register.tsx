@@ -134,10 +134,13 @@ export default function Register() {
               <div className="hr" />
 
               <div className="row" style={{ justifyContent: "space-between" }}>
-                <span className="small">Already have an account?</span>
-                <Link to="/login" className="badge badgeInfo">
-                  Sign in
-                </Link>
+               <span className="small">Already have an account?</span>
+<Link to="/login" className="badge badgeInfo">
+  Sign in
+</Link>
+</div>
+<div style={{ textAlign: "center", marginTop: 12 }}>
+  <Link to="/" style={{ color: "var(--muted)", fontSize: 13 }}>← Back to home</Link>
               </div>
             </form>
           </div>

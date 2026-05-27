@@ -164,9 +164,12 @@ export default function Login() {
                 <div className="hr" />
 
                 <div className="row" style={{ justifyContent: "space-between" }}>
-                  <span className="small">No account?</span>
-                  <Link to="/register" className="badge badgeInfo">Register</Link>
-                </div>
+  <span className="small">No account?</span>
+  <Link to="/register" className="badge badgeInfo">Register</Link>
+</div>
+<div style={{ textAlign: "center", marginTop: 12 }}>
+  <Link to="/" style={{ color: "var(--muted)", fontSize: 13 }}>← Back to home</Link>
+</div>
 
                 {(loadingAuth || loadingProfile || (user && !profileReady)) && (
                   <div className="small" style={{ marginTop: 12, textAlign: "center" }}>
